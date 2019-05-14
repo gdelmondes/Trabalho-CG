@@ -4,8 +4,8 @@ let {mat4, vec4, vec3, vec2} = glMatrix;
 
 const SPEED = 0.8;
 
-let kd = 0, 
-    kl = 0, 
+let kd = 0,
+    kl = 0,
     pos = [0,0,0];
 
 let frame = 0,
@@ -46,7 +46,10 @@ let frame = 0,
     color3 = [0, .7, 0],
     color4 = [1, 0, 1],
     color5 = [1, .6, 0],
-    color6 = [0, 1, 1];
+    color6 = [0, 1, 1],
+    slidX,
+    slidY,
+    slidZ;
 
 function resize() {
     if (!gl) return;
@@ -139,25 +142,25 @@ function getData() {
         esquerda: [-1,0,0],
         direita: [1,0,0],
         fundo: [0,0,1],
-      };
-    
-      let faceNormals = {
+    };
+
+    let faceNormals = {
         frente: [...n.frente, ...n.frente, ...n.frente, ...n.frente, ...n.frente, ...n.frente],
         topo: [...n.topo, ...n.topo, ...n.topo, ...n.topo, ...n.topo, ...n.topo],
         baixo: [...n.baixo, ...n.baixo, ...n.baixo, ...n.baixo, ...n.baixo, ...n.baixo],
         esquerda: [...n.esquerda, ...n.esquerda, ...n.esquerda, ...n.esquerda, ...n.esquerda, ...n.esquerda],
         direita: [...n.direita, ...n.direita, ...n.direita, ...n.direita, ...n.direita, ...n.direita],
         fundo: [...n.fundo, ...n.fundo, ...n.fundo, ...n.fundo, ...n.fundo, ...n.fundo],
-      };
-    
-      let normals = [
+    };
+
+    let normals = [
         ...faceNormals.frente,
         ...faceNormals.topo,
         ...faceNormals.baixo,
         ...faceNormals.esquerda,
         ...faceNormals.direita,
         ...faceNormals.fundo
-      ];
+    ];
 
     return { "points": new Float32Array(faces), "normals": new Float32Array(normals)};
 }
@@ -207,30 +210,39 @@ function getData2() {
         esquerda: [-1,0,0],
         direita: [1,0,0],
         fundo: [0,0,1],
-      };
-    
-      let faceNormals = {
+    };
+
+    let faceNormals = {
         frente: [...n.frente, ...n.frente, ...n.frente, ...n.frente, ...n.frente, ...n.frente],
         topo: [...n.topo, ...n.topo, ...n.topo, ...n.topo, ...n.topo, ...n.topo],
         baixo: [...n.baixo, ...n.baixo, ...n.baixo, ...n.baixo, ...n.baixo, ...n.baixo],
         esquerda: [...n.esquerda, ...n.esquerda, ...n.esquerda, ...n.esquerda, ...n.esquerda, ...n.esquerda],
         direita: [...n.direita, ...n.direita, ...n.direita, ...n.direita, ...n.direita, ...n.direita],
         fundo: [...n.fundo, ...n.fundo, ...n.fundo, ...n.fundo, ...n.fundo, ...n.fundo],
-      };
-    
-      let normals = [
+    };
+
+    let normals = [
         ...faceNormals.frente,
         ...faceNormals.topo,
         ...faceNormals.baixo,
         ...faceNormals.esquerda,
         ...faceNormals.direita,
         ...faceNormals.fundo
-      ];
+    ];
 
     return { "points": new Float32Array(faces), "normals": new Float32Array(normals)};
 }
 
 async function main() {
+    document.getElementById("sliderx").oninput = function() {
+        sliderFunc()
+    };
+    document.getElementById("slidery").oninput = function() {
+        sliderFunc()
+    };
+    document.getElementById("sliderz").oninput = function() {
+        sliderFunc()
+    };
     // 1 - Carregar tela de desenho
     canvas = getCanvas();
 
@@ -294,13 +306,13 @@ async function main() {
 
     // 7.3 - MODEL MATRIX UNIFORM
     modelUniform = gl.getUniformLocation(shaderProgram, "model");
-    
+
     model = mat4.fromTranslation([], pos);
 
     model2 = mat4.fromTranslation([], [-15,-15,-15]);
 
     model2 = mat4.fromScaling([],[80,0.01,80]);
-    
+
 
 
     // 7.4 - COLOR UNIFORM
@@ -313,10 +325,11 @@ async function main() {
 }
 
 function render() {
+
     frame ++;
 
     let time = frame / 100;
-    
+
     pos[0] += kl;
     pos[1] = 10;
     pos[2] -= kd;
@@ -333,14 +346,14 @@ function render() {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     // gl.POINTS
     // gl.LINES, gl.LINE_STRIP, gl.LINE_LOOP
-    // gl.TRIANGLES, gl.TRIANGLE_STRIP, gl.TRIANGLE_FAN 
+    // gl.TRIANGLES, gl.TRIANGLE_STRIP, gl.TRIANGLE_FAN
     //gl.drawArrays(gl.TRIANGLES, 0, data.points.length / 2);
 
     //CHAO
     gl.uniformMatrix4fv(modelUniform, false, model2);
     gl.uniform3f(colorUniform, color3[0], color3[1], color3[2]);
     gl.drawArrays(gl.TRIANGLES, 0, 36);
-    
+
     // CUBO POWER UP
     gl.uniformMatrix4fv(modelUniform, false, apple());
     gl.uniform3f(colorUniform, color1[0], color1[1], color1[2]);
@@ -385,10 +398,10 @@ function render() {
             jogoAtivo=false;
             alert("Game Over!");
             restart();
-            
+
         }
     }
-    
+
     if(jogoAtivo) window.requestAnimationFrame(render);
 }
 
@@ -403,9 +416,9 @@ function keyUp(evt){}
 function restart(){
     snakeXY = [];
     snakeLength = 1;
-    kd = 0, 
-    kl = 0, 
-    pos = [0,0,0];
+    kd = 0,
+        kl = 0,
+        pos = [0,0,0];
     a = Math.random()* (((width/10)-10)  + ((width/10)-10) + 1) - ((width/10)-10);
     b = Math.random()* (((height/10)-10) + ((height/10)-10) + 1) - ((height/10)-10);
     jogoAtivo = true;
@@ -425,11 +438,11 @@ function keyDown(evt){
         kd=0;
         return kl = -1.1;
     }
-    if(evt.key === "ArrowRight" && kl >= 0) { 
+    if(evt.key === "ArrowRight" && kl >= 0) {
         kd=0;
         return kl = 1.1;
     }
-    if(evt.key === "P") { 
+    if(evt.key === "P") {
         snakeLength++;
     }
 }
@@ -449,7 +462,7 @@ function snakePlayer(){
     for(var i=0; i < snakeXY.length; i++){
         gl.uniformMatrix4fv(modelUniform, false, mat4.fromTranslation([], snakeXY[i]));
         gl.uniform3f(colorUniform, color2[0], color2[1], color2[2]);
-        gl.drawArrays(gl.TRIANGLES, 0, 36); 
+        gl.drawArrays(gl.TRIANGLES, 0, 36);
     }
 }
 
@@ -459,6 +472,19 @@ function gameover(){
     }
 }
 
+function sliderFunc() {
+    slidX = document.getElementById("sliderx").value;
+    document.getElementById('outputx').innerHTML = slidX;
+    slidY = document.getElementById("slidery").value;
+    document.getElementById('outputy').innerHTML = slidY;
+    slidZ = document.getElementById("sliderz").value;
+    document.getElementById('outputz').innerHTML = slidZ;
+    eye  = [slidX, slidY, slidZ];
+
+    console.log(slidX);
+    console.log(slidY);
+    console.log(slidZ);
+}
 // keypress, keydown, keyup
 window.addEventListener("load", main);
 
